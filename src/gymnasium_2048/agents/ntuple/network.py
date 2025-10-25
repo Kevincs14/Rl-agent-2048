@@ -57,7 +57,7 @@ class NTupleNetwork:
         :return: The prediction of the network.
         """
         assert len(tuples) == len(self.weights)
-        return sum(w.item(t) for w, t in zip(self.weights, tuples))
+        return sum(w[t] for w, t in zip(self.weights, tuples))
 
     def update(self, tuples: Sequence[Sequence[int]], delta: float) -> None:
         """
@@ -68,7 +68,7 @@ class NTupleNetwork:
         """
         assert len(tuples) == len(self.weights)
         for w, t in zip(self.weights, tuples):
-            w.itemset(t, w.item(t) + delta)
+            w[t] += delta
 
     def save(self, path: str | pathlib.Path | io.BufferedIOBase) -> None:
         """

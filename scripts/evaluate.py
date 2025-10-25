@@ -116,8 +116,8 @@ def run_episodes(
 
             _observation, _reward, terminated, truncated, info = env.step(action)
 
-        lengths.extend(info["episode"]["l"])
-        rewards.extend(info["episode"]["r"])
+        lengths.append(info["episode"]["l"])
+        rewards.append(info["episode"]["r"])
         max_tiles.append(info["max"])
         total_score.append(info["total_score"])
 
