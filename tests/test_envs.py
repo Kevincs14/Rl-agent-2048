@@ -244,3 +244,9 @@ def test_step(
     assert not terminated
     assert not truncated
     assert isinstance(info, dict)
+    assert isinstance(info["board"], np.ndarray)
+    assert isinstance(info["step_score"], int)
+    assert isinstance(info["total_score"], int)
+    assert isinstance(info["max"], int)
+    assert isinstance(info["is_legal"], bool)
+    assert isinstance(info["illegal_count"], int)

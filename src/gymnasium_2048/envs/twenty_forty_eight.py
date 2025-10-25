@@ -84,7 +84,7 @@ class TwentyFortyEightEnv(gym.Env):
             "board": self.board,
             "step_score": self.step_score,
             "total_score": self.total_score,
-            "max": np.max(self.board),
+            "max": np.max(self.board).item(),
             "is_legal": self.is_legal,
             "illegal_count": self.illegal_count,
         }
@@ -155,7 +155,7 @@ class TwentyFortyEightEnv(gym.Env):
         for row in range(1, board.shape[0]):
             for col in range(board.shape[1]):
                 if board[row, col] != 0 and board[row, col] == board[row - 1, col]:
-                    score += 2 ** (board[row, col] + 1)
+                    score += 2 ** (board[row, col].item() + 1)
                     board[row - 1, col] = board[row - 1, col] + 1
                     board[row, col] = 0
 
@@ -269,7 +269,7 @@ class TwentyFortyEightEnv(gym.Env):
             return self._render_frame()
 
     def _get_value(self, row: int, col: int) -> int:
-        return 2 ** self.board[row, col] if self.board[row, col] > 0 else 0
+        return 2 ** self.board[row, col].item() if self.board[row, col] > 0 else 0
 
     @staticmethod
     def _get_background_color(value: int) -> tuple[int, int, int]:
