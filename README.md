@@ -241,7 +241,7 @@ To cite the repository in publications:
 
 - [Gymnasium](https://github.com/Farama-Foundation/Gymnasium)
 - [Szubert and Jaśkowski: Temporal Difference Learning of N-Tuple Networks
-  for the Game 2048](https://www.cs.put.poznan.pl/wjaskowski/pub/papers/Szubert2014_2048.pdf)
+  for the Game 2048](https://www.cs.put.poznan.pl/mszubert/pub/szubert2014cig.pdf)
 - [Guei and Wu: On Reinforcement Learning for the Game of 2048](https://arxiv.org/pdf/2212.11087.pdf)
 
 ## Author
