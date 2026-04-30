@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 import math
 import copy
+import numpy as np
 
 class Node:
     def __init__(self, state, parent=None):
@@ -64,7 +65,8 @@ def backpropagate(node, value):
 
 def expand(node, model):
     # flatten board to (16,) for the model
-    state_t = torch.tensor(node.state.flatten(), dtype=torch.float32)
+
+    state_t = torch.tensor(np.log2(node.state + 1).flatten(), dtype=torch.float32)
     value, logits = model(state_t)
     probs = F.softmax(logits, dim=-1).detach().numpy()
 
@@ -75,29 +77,31 @@ def expand(node, model):
 
     return value.item()
 
-def run_mcts(env, state, model, num_simulations=20):
+def run_mcts(env, state, model, num_simulations=50):
+   
     root = Node(state)
     expand(root, model)
+   
 
-    for _ in range(num_simulations):
+    for i in range(num_simulations):
+      
         node = root
         sim_state = state.copy()
+        depth = 0
 
-        # SELECT
-        while node.children:
+        while node.children and depth < 10:
             action, node = select_child(node)
             sim_state, reward, done = step_env(env, sim_state, action)
-            node.state = sim_state  # set state as we traverse
+            node.state = sim_state
+            depth += 1
             if done:
                 break
 
-        # EXPAND (only if not done)
-        if node.state is not None:
+        if node.state is not None and not done:
             value = expand(node, model)
         else:
             value = 0.0
 
-        # BACKPROP
         backpropagate(node, value)
 
     visits = [root.children[a].visits for a in range(4)]
