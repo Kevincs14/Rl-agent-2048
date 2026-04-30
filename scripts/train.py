@@ -2,11 +2,12 @@ import gymnasium_2048
 import gymnasium as gym
 import torch
 import torch.nn.functional as F
+import numpy as np
 from model import PolicyNetwork
 from mcts import run_mcts
 
-env = gym.make("gymnasium_2048/TwentyFortyEight-v0", render_mode="human")
-model = PolicyNetwork(state_dim=16, action_dim=4, hidden_dim=128)
+env = gym.make("gymnasium_2048/TwentyFortyEight-v0", render_mode=None)
+model = PolicyNetwork(state_dim=16, action_dim=4, hidden_dim=256)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 gamma = 0.99
@@ -17,9 +18,12 @@ for episode in range(500):
     state = env.unwrapped.board.copy()
     done = False
     total_reward = 0
+    max_steps = 1000
+    step_count = 0
 
-    while not done:
-        state_t = torch.tensor(state.flatten(), dtype=torch.float32)
+    while not done and step_count < max_steps:
+        step_count += 1
+        state_t = torch.tensor(np.log2(state + 1).flatten(), dtype=torch.float32)
         state_value, logits = model(state_t)
 
         mcts_policy = run_mcts(env, state, model)
@@ -27,7 +31,7 @@ for episode in range(500):
 
         obs, reward, terminated, truncated, _ = env.step(action)
         next_state = env.unwrapped.board.copy()
-        next_state_t = torch.tensor(next_state.flatten(), dtype=torch.float32)
+        next_state_t = torch.tensor(np.log2(next_state + 1).flatten(), dtype=torch.float32)
 
         next_state_value, _ = model(next_state_t)
 
