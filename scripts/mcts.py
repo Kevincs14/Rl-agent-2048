@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 import math
-import copy
 import numpy as np
 
 class Node:
@@ -30,14 +29,12 @@ def select_child(node):
     return best_action, best_child
 
 def step_env(env, state, action):
-    # save real env state
     real_board = env.unwrapped.board.copy()
     real_score = env.unwrapped.total_score
     real_step_score = env.unwrapped.step_score
     real_is_legal = env.unwrapped.is_legal
     real_illegal_count = env.unwrapped.illegal_count
 
-    # set sim state
     env.unwrapped.board = state.copy()
     env.unwrapped.total_score = 0
     env.unwrapped.step_score = 0
@@ -48,7 +45,6 @@ def step_env(env, state, action):
     next_board = env.unwrapped.board.copy()
     done = terminated or truncated
 
-    # restore real env state
     env.unwrapped.board = real_board
     env.unwrapped.total_score = real_score
     env.unwrapped.step_score = real_step_score
@@ -64,9 +60,7 @@ def backpropagate(node, value):
         node = node.parent
 
 def expand(node, model):
-    # flatten board to (16,) for the model
-
-    state_t = torch.tensor(np.log2(node.state + 1).flatten(), dtype=torch.float32)
+    state_t = torch.tensor(np.log2(node.state + 1).flatten(), dtype=torch.float32).unsqueeze(0)
     value, logits = model(state_t)
     probs = F.softmax(logits, dim=-1).detach().numpy()
 
@@ -77,19 +71,17 @@ def expand(node, model):
 
     return value.item()
 
-def run_mcts(env, state, model, num_simulations=50):
-   
+def run_mcts(env, state, model, num_simulations=20):
     root = Node(state)
     expand(root, model)
-   
 
     for i in range(num_simulations):
-      
         node = root
         sim_state = state.copy()
         depth = 0
+        done = False
 
-        while node.children and depth < 10:
+        while node.children and depth < 5:
             action, node = select_child(node)
             sim_state, reward, done = step_env(env, sim_state, action)
             node.state = sim_state
